@@ -24,6 +24,15 @@ def start(message: Message):
     bot_client.send_message(chat_id=user_id, text=f"Пользователь {username} успешно зарегистрирован")
 
 
+def handle_ask_me(message: Message):
+    bot_client.reply_to(message, "Спасибо, что поделился! Скоро я прочитаю твое сообщение и разберу все возникшие вопросы. Хорошего дня!")
+
+
+@bot_client.message_handler(commands="ask_me")
+def ask_me(message: Message):
+    bot_client.reply_to(message, text="Привет!\nКак успехи?\nРешал вчера ЕГЭ?\nКакие трудности возникли?\n---\n"
+                                      "Пожалуйста, отправь ответ в одном сообщении боту или же напиши мне лично @yanasirina")
+    bot_client.register_next_step_handler(message, callback=handle_ask_me)
 
 
 bot_client.polling()
