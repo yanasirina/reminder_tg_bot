@@ -1,11 +1,15 @@
 from json import JSONDecodeError
 import telebot
 from telebot.types import Message
-from keys import BOT_TOKEN, ADMIN_ID
 import json
 import requests
 from datetime import datetime
+from envparse import Env
 
+
+env = Env()
+BOT_TOKEN = env.str("BOT_TOKEN")
+ADMIN_ID = env.str("ADMIN_ID")
 
 bot_client = telebot.TeleBot(BOT_TOKEN)
 
