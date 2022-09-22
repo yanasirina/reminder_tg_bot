@@ -1,7 +1,10 @@
+from json import JSONDecodeError
 import telebot
 from telebot.types import Message
 from keys import BOT_TOKEN, ADMIN_ID
 import json
+import requests
+from datetime import datetime
 
 
 bot_client = telebot.TeleBot(BOT_TOKEN)
@@ -35,4 +38,10 @@ def ask_me(message: Message):
     bot_client.register_next_step_handler(message, callback=handle_ask_me)
 
 
-bot_client.polling()
+while True:
+    try:
+        bot_client.polling()
+    except Exception as error:
+        # bot_client.send_message(chat_id=ADMIN_ID, text=f"Ошибка {error}")
+        requests.post(f"https://api.telegram.org/bot5413371958:AAFQNG8RE8IT5RKAqaDpPS1Yc_3b6IVm2r0/"
+                      f"sendMessage?chat_id=284868574&text={error.__class__}\n{error}\n\n{datetime.now()}")
