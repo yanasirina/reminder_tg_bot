@@ -1,8 +1,6 @@
-from json import JSONDecodeError
 import telebot
 from telebot.types import Message
 import json
-import requests
 from datetime import datetime
 from envparse import Env
 from clients.telegram_client import TelegramClient
