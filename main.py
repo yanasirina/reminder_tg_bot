@@ -1,40 +1,47 @@
 import telebot
 from telebot.types import Message
-import json
 from datetime import datetime
 from envparse import Env
 from clients.telegram_client import TelegramClient
-
-
-class MyBot(telebot.TeleBot):
-    def __init__(self, telegram_client: TelegramClient, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.telegram_client = telegram_client
+from template import SQLiteClient, UserAction
 
 
 env = Env()
 BOT_TOKEN = env.str("BOT_TOKEN")
 ADMIN_ID = env.str("ADMIN_ID")
+user_act = UserAction(SQLiteClient("users.db"))
+
+
+class MyBot(telebot.TeleBot):
+    def __init__(self, telegram_client: TelegramClient, user_action: UserAction, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.telegram_client = telegram_client
+        self.user_action = user_action
+
+    def setup_resources(self):
+        self.user_action.setup()
+
 
 tg_client = TelegramClient(token=BOT_TOKEN, base_url="https://api.telegram.org")
-bot_client = MyBot(telegram_client=tg_client, token=BOT_TOKEN)
+bot_client = MyBot(telegram_client=tg_client, token=BOT_TOKEN, user_action=user_act)
+bot_client.setup_resources()
 
 
 @bot_client.message_handler(commands=["start"])
 def start(message: Message):
     user_id = message.from_user.id
     username = message.from_user.username
+    chat_id = message.chat.id
+    create_new_user = False
 
-    with open("users.json", "r") as f:
-        data_from_json = json.load(f)
+    user = bot_client.user_action.get_user(user_id=user_id)
+    if not user:
+        bot_client.user_action.create_user(user_id=user_id, username=username, chat_id=chat_id)
+        create_new_user = True
 
-    if user_id not in data_from_json:
-        data_from_json[user_id] = {"username": username}
-
-    with open("users.json", "w") as f:
-        json.dump(data_from_json, f, indent=4, ensure_ascii=False)
-
-    bot_client.send_message(chat_id=user_id, text=f"Пользователь {username} успешно зарегистрирован")
+    reply = f"Вы {'уже ' if not create_new_user else ''}зарегистрированы: {username}.\n" \
+            f"Ваш id: {user_id}."
+    bot_client.reply_to(message=message, text=reply)
 
 
 def handle_ask_me(message: Message):
