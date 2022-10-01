@@ -1,14 +1,6 @@
 import sqlite3
 
 
-CREATE_USER = """
-INSERT INTO users (user_id, username, chat_id) VALUES (?, ?, ?);
-"""
-
-GET_USER = """
-SELECT user_id, username, chat_id FROM users WHERE user_id = %s;
-"""
-
 class SQLiteClient:
     def __init__(self, filepath: str):
         self.filepath = filepath
@@ -33,7 +25,26 @@ class SQLiteClient:
             raise ConnectionError("Вы не создали подключение к базе данных")
 
 
-sqlite_client = SQLiteClient("users.db")
-sqlite_client.create_conn()
-a = sqlite_client.execute_select_command(GET_USER % (1, ))
-с = 1
+class UserAction:
+    CREATE_USER = """
+    INSERT INTO users (user_id, username, chat_id) VALUES (?, ?, ?);
+    """
+
+    GET_USER = """
+    SELECT user_id, username, chat_id FROM users WHERE user_id = %s;
+    """
+
+    def __init__(self, database_client: SQLiteClient):
+        self.database_client = database_client
+
+    def setup(self):
+        self.database_client.create_conn()
+
+    def get_user(self, user_id: str):
+        user = self.database_client.execute_select_command(self.GET_USER % user_id)
+        return user[0] if user else user
+
+    def create_user(self, user_id: str, username: str, chat_id: str):
+        self.database_client.execute_command(self.CREATE_USER, (user_id, username, chat_id))
+
+
