@@ -3,8 +3,14 @@ from telebot.types import Message
 from datetime import datetime
 from envparse import Env
 from clients.telegram_client import TelegramClient
-from template import SQLiteClient, UserAction
+from clients.sqlite3_client import SQLiteClient
+from template import UserAction
+from logging import getLogger, StreamHandler
 
+
+logger = getLogger(__name__)
+logger.addHandler(StreamHandler())
+logger.setLevel("INFO")
 
 env = Env()
 BOT_TOKEN = env.str("BOT_TOKEN")
@@ -20,6 +26,9 @@ class MyBot(telebot.TeleBot):
 
     def setup_resources(self):
         self.user_action.setup()
+
+    def shutdown_resources(self):
+        self.user_action.shutdown()
 
 
 tg_client = TelegramClient(token=BOT_TOKEN, base_url="https://api.telegram.org")
@@ -57,8 +66,11 @@ def ask_me(message: Message):
 
 while True:
     try:
+        bot_client.setup_resources()
         bot_client.polling()
     except Exception as error:
         txt = f"{error.__class__}\n{error}\n\n{datetime.now()}"
         bot_client.telegram_client.post(method="sendMessage", params={"text": txt,
                                                                       "chat_id": ADMIN_ID})
+        logger.error(txt)
+        bot_client.shutdown_resources()

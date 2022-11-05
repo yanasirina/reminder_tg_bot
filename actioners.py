@@ -40,6 +40,9 @@ class UserAction:
     def setup(self):
         self.database_client.create_conn()
 
+    def shutdown(self):
+        self.database_client.close_conn()
+
     def get_user(self, user_id: str):
         user = self.database_client.execute_select_command(self.GET_USER % user_id)
         return user[0] if user else user
