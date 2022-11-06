@@ -64,7 +64,7 @@ def handle_ask_me(message: Message):
 @bot_client.message_handler(commands="ask_me")
 def ask_me(message: Message):
     bot_client.reply_to(message, text="Привет!\nКак успехи?\nРешал вчера ЕГЭ?\nКакие трудности возникли?\n---\n"
-                                      "Пожалуйста, отправь ответ в одном сообщении боту или же напиши мне лично @yanasirina")
+                                      "Пожалуйста, отправь ответ в одном сообщении!!!")
     bot_client.register_next_step_handler(message, callback=handle_ask_me)
 
 
