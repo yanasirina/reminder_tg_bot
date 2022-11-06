@@ -1,10 +1,10 @@
 import telebot
 from telebot.types import Message
-from datetime import datetime
+from datetime import datetime, date
 from envparse import Env
 from clients.telegram_client import TelegramClient
 from clients.sqlite3_client import SQLiteClient
-from template import UserAction
+from actioners import UserAction
 from logging import getLogger, StreamHandler
 
 
@@ -54,6 +54,10 @@ def start(message: Message):
 
 
 def handle_ask_me(message: Message):
+    bot_client.user_action.update_date(user_id=str(message.from_user.id), updated_date=date.today())
+    bot_client.send_message(chat_id=ADMIN_ID, text=f"Пользователь: {message.from_user.id} {message.from_user.username}"
+                                                   f"\n\nСообщение: {message.text}"
+                                                   f"\n\nДата: {date.today()}")
     bot_client.reply_to(message, "Спасибо, что поделился! Скоро я прочитаю твое сообщение и разберу все возникшие вопросы. Хорошего дня!")
 
 
